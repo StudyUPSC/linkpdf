@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>📊 UPSC प्रगति डैशबोर्ड – NCERT · Books · Notes</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0d14;
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 60px;
+      background: #111827;
+      border-radius: 24px;
+    }
+
+    .loader-ring {
+      width: 50px;
+      height: 50px;
+      border: 3px solid #1e2d45;
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    button {
+      background: #2c5282;
+      border: none;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      border-radius: 16px;
+      padding: 20px;
+      flex: 1 1 240px;
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .big-num {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono';
+    }
+
+    .subject-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .subject-label {
+      width: 130px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-high {
+      background: #10b98120;
+      color: #10b981;
+    }
+
+    .badge-med {
+      background: #f59e0b20;
+      color: #f59e0b;
+    }
+
+    .badge-low {
+      background: #ef444420;
+      color: #ef4444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th,
+    td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #1e2d45;
+    }
+
+    th {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .heatmap-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .heatmap-cell {
+      width: 22px;
+      height: 22px;
+      background: #1e293b;
+      border-radius: 4px;
+    }
+
+    .h1 {
+      background: #00d4ff30;
+    }
+
+    .h2 {
+      background: #00d4ff60;
+    }
+
+    .h3 {
+      background: #00d4ff90;
+    }
+
+    .h4 {
+      background: #00d4ff;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      color: #94a3b8;
+    }
+
+    .tab.active {
+      background: #00d4ff20;
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @media (max-width: 700px) {
+      .subject-label {
+        width: 100px;
+        font-size: 0.75rem;
+      }
+
+      .big-num {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container" id="main" style="display: none;"></div>
+  <div id="loader" class="loader">
+    <div class="loader-ring"></div>
+    <div>🔄 Google Sheets se data la rahe hain...</div>
+  </div>
+
+  <script>
+    // =================== YOUR CORRECT SHEET ID ===================
+    const SHEET_ID = '1GuXyX-WsIZlQ0Myoj4HIYL_YfXueOjigFi4ZqSPLq5U';
+    // ==============================================================
+
+    async function fetchSheet(sheetName) {
+      const url = `https://corsproxy.io/?url=${encodeURIComponent(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status} - ${sheetName} not accessible`);
+      const text = await res.text();
+      const rows = [];
+      const lines = text.split('\n');
+      for (let line of lines) {
+        if (!line.trim()) continue;
+        const cells = [];
+        let cur = '', inQ = false;
+        for (let ch of line) {
+          if (ch === '"') inQ = !inQ;
+          else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+          else cur += ch;
+        }
+        cells.push(cur.trim());
+        rows.push(cells);
+      }
+      return rows;
+    }
+
+    function cellNum(v) { let n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+    // NCERT parse (book, chapter, reading, mcqs)
+    function parseNCERT(rows) {
+      let books = [], current = null;
+      let started = false;
+      for (let row of rows) {
+        let c0 = row[0] || '', c1 = row[1] || '', c2 = row[2] || '', c5 = row[5] || '';
+        if (c1 === 'NCERT' || c2 === 'Reading') { started = true; continue; }
+        if (!started) continue;
+        if (c0 && !c0.startsWith('Total') && !c0.includes('Unread') && !c0.includes('Days')) {
+          let subject = 'Other';
+          let n = c0.toLowerCase();
+          if (n.includes('geo') || n.includes('bhugol')) subject = 'Geography';
+          else if (n.includes('his') || n.includes('itihas')) subject = 'History';
+          else if (n.includes('eco') || n.includes('arth')) subject = 'Economy';
+          else if (n.includes('polity') || n.includes('rajniti')) subject = 'Polity';
+          else if (n.includes('art') || n.includes('cul')) subject = 'Art & Culture';
+          current = { name: c0, subject, chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(current);
+        }
+        if (current && c1 && c1 !== '' && !c1.includes('Total =') && c1 !== 'NCERT') {
+          let reading = cellNum(c2);
+          let mcqs = cellNum(c5);
+          current.chapters.push({ name: c1, reading, mcqs });
+          current.total_reading += reading;
+          current.total_mcqs += mcqs;
+        }
+      }
+      return books;
+    }
+
+    // Books parse (same structure)
+    function parseBooks(rows) {
+      let books = [], current = null;
+      let started = false;
+      for (let row of rows) {
+        let c0 = row[0] || '', c1 = row[1] || '', c2 = row[2] || '', c5 = row[5] || '';
+        if (c1 === 'Books' || c2 === 'Reading') { started = true; continue; }
+        if (!started) continue;
+        if (c0 && !c0.startsWith('"Total') && !c0.includes('Unread') && !c0.includes('Days')) {
+          let subject = 'Polity';
+          let n = c0.toLowerCase();
+          if (n.includes('geo')) subject = 'Geography';
+          else if (n.includes('history') || n.includes('rs sharma') || n.includes('mh') || n.includes('modern')) subject = 'History';
+          else if (n.includes('eco') || n.includes('vivek')) subject = 'Economy';
+          else if (n.includes('env')) subject = 'Environment';
+          current = { name: c0, subject, chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(current);
+        }
+        if (current && c1 && c1 !== '' && !c1.includes('Total =')) {
+          current.chapters.push({ name: c1, reading: cellNum(c2), mcqs: cellNum(c5) });
+          current.total_reading += cellNum(c2);
+          current.total_mcqs += cellNum(c5);
+        }
+      }
+      return books;
+    }
+
+    // Notes parse (subject, notebook#, reading, mcqs)
+    function parseNotes(rows) {
+      let notes = [];
+      let currentSubject = null;
+      const subjectMap = {
+        'History': 'History', 'Polity': 'Polity', 'Eco': 'Economy', 'Reasning': 'Reasoning/CSAT',
+        'Sci And Tech': 'Sci & Tech', 'GS': 'General Studies', 'RC': 'Reasoning/CSAT',
+        'Map world': 'Geography', 'Maths': 'Reasoning/CSAT', 'पाषाण काल': 'History',
+        'हड्प्पा काल': 'History', 'Morya': 'History', 'गुप्त काल': 'History'
+      };
+      for (let row of rows) {
+        let c0 = row[0] || '', c1 = row[1] || '', c2 = row[2] || '', c5 = row[5] || '';
+        if (c0 && !c0.includes('Total Unread') && !c0.includes('Remaining') && !c0.includes('Daily') && c0 !== 'Env') {
+          if (c1 && (c1 === 'Envirment' || parseInt(c1) > 0 || !isNaN(parseInt(c1)))) {
+            let sub = subjectMap[c0] || 'Other';
+            if (c0.toLowerCase().includes('south america')) sub = 'Geography';
+            if (c0.toLowerCase().includes('africa')) sub = 'Geography';
+            currentSubject = sub;
+          }
+        }
+        let nb = parseInt(c1);
+        if (!isNaN(nb) && nb > 0 && currentSubject) {
+          notes.push({ subject: currentSubject, notebook: nb, reading: cellNum(c2), mcqs: cellNum(c5) });
+        }
+      }
+      return notes;
+    }
+
+    // Progress sheet: columns H=date, I=ncert_read, J=notes_read, K=books_read, L=total
+    function parseProgress(rows) {
+      let data = [];
+      for (let row of rows) {
+        let dateStr = row[7] || '';   // column H (0-index 7)
+        if (!dateStr || !dateStr.match(/\d{4}-\d{2}-\d{2}/)) continue;
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) continue;
+        let ncert = cellNum(row[8]);
+        let notes = cellNum(row[9]);
+        let books = cellNum(row[10]);
+        let total = cellNum(row[11]);
+        data.push({
+          date: d.toISOString().slice(0, 10),
+          ncert_read: ncert, notes_read: notes, books_read: books, total_read: total || (ncert + notes + books)
+        });
+      }
+      return data.sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function aggregateBySubject(books) {
+      let map = {};
+      for (let b of books) {
+        if (!map[b.subject]) map[b.subject] = { subject: b.subject, total_reading: 0, total_mcqs: 0, chapters: 0 };
+        map[b.subject].total_reading += b.total_reading;
+        map[b.subject].total_mcqs += b.total_mcqs;
+        map[b.subject].chapters += b.chapters.length;
+      }
+      return Object.values(map);
+    }
+
+    function aggregateNotesBySubject(notes) {
+      let map = {};
+      for (let n of notes) {
+        if (!map[n.subject]) map[n.subject] = { subject: n.subject, total_reading: 0, total_mcqs: 0, notebooks: 0 };
+        map[n.subject].total_reading += n.reading;
+        map[n.subject].total_mcqs += n.mcqs;
+        map[n.subject].notebooks++;
+      }
+      return Object.values(map);
+    }
+
+    function renderBar(containerId, data, valueKey, colorMap = {}) {
+      let el = document.getElementById(containerId);
+      if (!el) return;
+      let max = Math.max(...data.map(d => d[valueKey]), 1);
+      el.innerHTML = data.map(d => {
+        let pct = Math.round(d[valueKey] / max * 100);
+        let color = colorMap[d.subject] || '#00d4ff';
+        return `<div class="subject-bar">
+        <div class="subject-label" style="color:${color}">${d.subject}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div style="width:50px;text-align:right">${d[valueKey]}</div>
+      </div>`;
+      }).join('');
+    }
+
+    function renderStackedChart(containerId, data) {
+      let el = document.getElementById(containerId);
+      if (!el) return;
+      if (data.length === 0) { el.innerHTML = '<div>No data</div>'; return; }
+      let max = Math.max(...data.map(d => d.total_read), 1);
+      el.innerHTML = `<canvas id="stackCanvas" width="800" height="200" style="width:100%;height:180px"></canvas>`;
+      let canvas = document.getElementById('stackCanvas');
+      if (!canvas) return;
+      let ctx = canvas.getContext('2d');
+      canvas.width = Math.max(800, data.length * 35);
+      canvas.height = 200;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let w = (canvas.width - 60) / data.length;
+      for (let i = 0; i < data.length; i++) {
+        let x = 40 + i * w;
+        let yBase = canvas.height - 20;
+        let h1 = (data[i].ncert_read / max) * (canvas.height - 50);
+        let h2 = (data[i].notes_read / max) * (canvas.height - 50);
+        let h3 = (data[i].books_read / max) * (canvas.height - 50);
+        ctx.fillStyle = '#00d4ff';
+        ctx.fillRect(x, yBase - h1, w - 2, h1);
+        ctx.fillStyle = '#ff6b35';
+        ctx.fillRect(x, yBase - h1 - h2, w - 2, h2);
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(x, yBase - h1 - h2 - h3, w - 2, h3);
+        if (i % 3 === 0) {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '8px monospace';
+          ctx.fillText(data[i].date.slice(5), x + 2, yBase - 4);
+        }
+      }
+    }
+
+    // ---------- MAIN ----------
+    async function init() {
+      const loader = document.getElementById('loader');
+      const mainDiv = document.getElementById('main');
+      try {
+        loader.style.display = 'block';
+        const [ncertRaw, booksRaw, notesRaw, progressRaw] = await Promise.all([
+          fetchSheet('NCERT'), fetchSheet('Books'), fetchSheet('Notes'), fetchSheet('Progress')
+        ]);
+        const ncertBooks = parseNCERT(ncertRaw);
+        const booksBooks = parseBooks(booksRaw);
+        const notesData = parseNotes(notesRaw);
+        const progress = parseProgress(progressRaw);
+
+        const ncertSubj = aggregateBySubject(ncertBooks);
+        const booksSubj = aggregateBySubject(booksBooks);
+        const notesSubj = aggregateNotesBySubject(notesData);
+
+        // build HTML
+        let html = `
+        <div class="tabs">
+          <div class="tab active" data-tab="overview">📊 Overview</div>
+          <div class="tab" data-tab="ncert">📗 NCERT</div>
+          <div class="tab" data-tab="books">📘 Books</div>
+          <div class="tab" data-tab="notes">📓 Notes</div>
+          <div class="tab" data-tab="progress">📈 Progress</div>
+          <div class="tab" data-tab="compare">⚖️ Compare</div>
+        </div>
+        <div id="panel-overview" class="panel active">${renderOverviewHTML(ncertSubj, booksSubj, notesSubj, progress)}</div>
+        <div id="panel-ncert" class="panel">${renderNcertHTML(ncertBooks, ncertSubj)}</div>
+        <div id="panel-books" class="panel">${renderBooksHTML(booksBooks, booksSubj)}</div>
+        <div id="panel-notes" class="panel">${renderNotesHTML(notesSubj)}</div>
+        <div id="panel-progress" class="panel">${renderProgressHTML(progress)}</div>
+        <div id="panel-compare" class="panel">${renderCompareHTML(ncertSubj, booksSubj, notesSubj)}</div>
+      `;
+        mainDiv.innerHTML = html;
+        loader.style.display = 'none';
+        mainDiv.style.display = 'block';
+
+        // attach tab events
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+          });
+        });
+        // render charts after mount
+        renderBar('overview-bars', [...ncertSubj, ...booksSubj, ...notesSubj].reduce((acc, cur) => {
+          let idx = acc.findIndex(a => a.subject === cur.subject);
+          if (idx === -1) acc.push({ subject: cur.subject, total_reading: cur.total_reading });
+          else acc[idx].total_reading += cur.total_reading;
+          return acc;
+        }, []), 'total_reading');
+        renderBar('ncert-subject-bars', ncertSubj, 'total_reading');
+        renderBar('books-subject-bars', booksSubj, 'total_reading');
+        renderBar('notes-subject-bars', notesSubj, 'total_reading');
+        renderStackedChart('daily-chart', progress.slice(-14));
+      } catch (err) {
+        loader.innerHTML = `<div class="error-box">
+        <h3>❌ Data Load Error</h3>
+        <p>${err.message}<br><br>⚠️ Google Sheet ko "Anyone with the link can view" karke share karein.</p>
+        <button onclick="location.reload()">🔄 Retry</button>
+      </div>`;
+      }
+    }
+
+    function renderOverviewHTML(ncertSubj, booksSubj, notesSubj, progress) {
+      let totalPages = progress.reduce((s, d) => s + d.total_read, 0);
+      let avg = Math.round(totalPages / Math.max(progress.length, 1));
+      return `
+      <div class="grid">
+        <div class="card"><div class="card-title">📚 Total Pages Read</div><div class="big-num">${totalPages}</div></div>
+        <div class="card"><div class="card-title">📅 Daily Avg</div><div class="big-num">${avg}</div></div>
+        <div class="card"><div class="card-title">📗 NCERT Topics</div><div class="big-num">${ncertSubj.reduce((s, d) => s + d.chapters, 0)}</div></div>
+      </div>
+      <div class="card"><div class="card-title">📊 Subject-wise Total Reading (NCERT+Books+Notes)</div><div id="overview-bars"></div></div>
+      <div class="card"><div class="card-title">📈 Last 14 Days Reading</div><div id="daily-chart" style="min-height:180px"></div></div>
+    `;
+    }
+    function renderNcertHTML(books, subj) {
+      let tableRows = books.map(b => `<tr><td title="${b.name}">${b.name.slice(0, 35)}</td><td>${b.subject}</td><td>${b.chapters.length}</td><td><b>${b.total_reading}</b></td><td>${b.total_mcqs}</td><td>${b.total_reading > 80 ? '<span class="badge badge-high">Strong</span>' : b.total_reading > 20 ? '<span class="badge badge-med">Partial</span>' : '<span class="badge badge-low">Pending</span>'}</td></tr>`).join('');
+      return `<div class="card"><div class="card-title">📖 Subject-wise Reading</div><div id="ncert-subject-bars"></div></div>
+            <div class="card"><div class="card-title">📚 Book-wise Detail</div><div style="overflow-x:auto"><table><tr><th>Book</th><th>Subject</th><th>Ch</th><th>Pages</th><th>MCQs</th><th>Status</th></tr>${tableRows}</table></div></div>`;
+    }
+    function renderBooksHTML(books, subj) {
+      let tableRows = books.map(b => `<tr><td>${b.name.slice(0, 40)}</td><td>${b.subject}</td><td>${b.chapters.length}</td><td><b>${b.total_reading}</b></td><td>${b.total_mcqs}</td><td>${b.total_reading > 50 ? '<span class="badge badge-high">Done</span>' : b.total_reading > 0 ? '<span class="badge badge-med">Partial</span>' : '<span class="badge badge-low">Pending</span>'}</td></tr>`).join('');
+      return `<div class="card"><div class="card-title">📖 Subject-wise Reading</div><div id="books-subject-bars"></div></div>
+            <div class="card"><div class="card-title">📚 Book-wise Detail</div><div style="overflow-x:auto"><table><tr><th>Book/Section</th><th>Subject</th><th>Ch</th><th>Pages</th><th>MCQs</th><th>Status</th></tr>${tableRows}</table></div></div>`;
+    }
+    function renderNotesHTML(subj) {
+      let rows = subj.map(s => `<tr><td>${s.subject}</td><td>${s.notebooks}</td><td><b>${s.total_reading}</b></td><td>${s.total_mcqs}</td><td>${s.total_reading > 100 ? '<span class="badge badge-high">Good</span>' : s.total_reading > 40 ? '<span class="badge badge-med">Medium</span>' : '<span class="badge badge-low">Low</span>'}</td></tr>`).join('');
+      return `<div class="card"><div class="card-title">📖 Subject-wise Reading</div><div id="notes-subject-bars"></div></div>
+            <div class="card"><div class="card-title">📓 Subject Analysis</div><div style="overflow-x:auto"><table><tr><th>Subject</th><th>Notebooks</th><th>Pages</th><th>MCQs</th><th>Priority</th></tr>${rows}</table></div></div>`;
+    }
+    function renderProgressHTML(progress) {
+      let heat = progress.slice(-90).map(d => {
+        let pct = d.total_read / (Math.max(...progress.map(p => p.total_read), 1));
+        let cls = pct === 0 ? '' : pct < 0.25 ? 'h1' : pct < 0.5 ? 'h2' : pct < 0.75 ? 'h3' : 'h4';
+        return `<div class="heatmap-cell ${cls}" title="${d.date}: ${d.total_read} pages"></div>`;
+      }).join('');
+      return `<div class="card"><div class="card-title">📅 Daily Timeline (Last 14 days)</div><div id="daily-chart" style="min-height:180px"></div></div>
+            <div class="card"><div class="card-title">🔥 Activity Heatmap (Last 90 days)</div><div class="heatmap-grid">${heat}</div></div>`;
+    }
+    function renderCompareHTML(ncertSubj, booksSubj, notesSubj) {
+      let combined = {};
+      ncertSubj.forEach(s => combined[s.subject] = { ...combined[s.subject], ncert: s.total_reading });
+      booksSubj.forEach(s => combined[s.subject] = { ...combined[s.subject], books: s.total_reading });
+      notesSubj.forEach(s => combined[s.subject] = { ...combined[s.subject], notes: s.total_reading });
+      let subjects = Object.keys(combined);
+      let compareHtml = subjects.map(sub => {
+        let n = combined[sub].ncert || 0, b = combined[sub].books || 0, nt = combined[sub].notes || 0;
+        let total = n + b + nt;
+        return `<div class="subject-bar"><div class="subject-label">${sub}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, total / 50)}%;background:#7c3aed"></div></div><div>${total}</div></div>`;
+      }).join('');
+      return `<div class="card"><div class="card-title">⚖️ Total Reading Comparison</div>${compareHtml}</div>`;
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
