@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 UPSC प्रगति डैशबोर्ड</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      background: #0a0d14;
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      padding: 20px
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto
+    }
+
+    .loader {
+      text-align: center;
+      padding: 60px;
+      background: #111827;
+      border-radius: 24px
+    }
+
+    .ring {
+      width: 50px;
+      height: 50px;
+      border: 3px solid #1e2d45;
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .err {
+      background: rgba(239, 68, 68, .1);
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center
+    }
+
+    button {
+      background: #1e3a5f;
+      border: 1px solid #2c5282;
+      color: #90cdf4;
+      padding: 9px 22px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .9rem
+    }
+
+    .grid {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      border-radius: 16px;
+      padding: 18px;
+      flex: 1 1 180px;
+      margin-bottom: 14px
+    }
+
+    .ct {
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #64748b;
+      margin-bottom: 10px
+    }
+
+    .num {
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono'
+    }
+
+    .sbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px
+    }
+
+    .slabel {
+      width: 140px;
+      font-size: .82rem;
+      font-weight: 600;
+      flex-shrink: 0
+    }
+
+    .track {
+      flex: 1;
+      height: 7px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .8s
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: .68rem;
+      font-weight: 600
+    }
+
+    .bh {
+      background: #10b98120;
+      color: #10b981
+    }
+
+    .bm {
+      background: #f59e0b20;
+      color: #f59e0b
+    }
+
+    .bl {
+      background: #ef444420;
+      color: #ef4444
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .78rem
+    }
+
+    th,
+    td {
+      padding: 9px 8px;
+      text-align: left;
+      border-bottom: 1px solid #1e2d45
+    }
+
+    th {
+      color: #64748b;
+      font-weight: 500
+    }
+
+    .hmap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: 10px
+    }
+
+    .hc {
+      width: 20px;
+      height: 20px;
+      background: #1e293b;
+      border-radius: 3px
+    }
+
+    .h1 {
+      background: #00d4ff25
+    }
+
+    .h2 {
+      background: #00d4ff55
+    }
+
+    .h3 {
+      background: #00d4ff88
+    }
+
+    .h4 {
+      background: #00d4ff
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+      flex-wrap: wrap
+    }
+
+    .tab {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      padding: 7px 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      color: #94a3b8;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .9rem
+    }
+
+    .tab.on {
+      background: #00d4ff15;
+      border-color: #00d4ff;
+      color: #00d4ff
+    }
+
+    .panel {
+      display: none
+    }
+
+    .panel.on {
+      display: block
+    }
+
+    .leg {
+      display: flex;
+      gap: 14px;
+      margin-top: 7px;
+      font-size: .72rem;
+      flex-wrap: wrap
+    }
+
+    .li {
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .ld {
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    @media(max-width:600px) {
+      .slabel {
+        width: 95px;
+        font-size: .75rem
+      }
+
+      .num {
+        font-size: 1.7rem
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="app" style="display:none"></div>
+  <div id="loader" class="loader">
+    <div class="ring"></div>
+    <div id="msg">🔄 Data fetch ho raha hai...</div>
+  </div>
+  <script>
+    // =============================================
+    // APPS SCRIPT URL — yahi ek jagah change karna hai
+    const API = 'https://script.google.com/macros/s/AKfycbxZAFVIyKG_cJhFF3KOEdr4AOC8kKMYiGpiA0nd0eT0T1FKyulH3N9zWrPV11uGexSY/exec';
+    // =============================================
+
+    const COL = {
+      Geography: '#00d4ff', History: '#ff6b35', Economy: '#10b981',
+      Polity: '#7c3aed', 'Art & Culture': '#f59e0b', Environment: '#22c55e',
+      'Sci & Tech': '#ec4899', 'Reasoning/CSAT': '#8b5cf6', 'General Studies': '#06b6d4', Other: '#64748b'
+    };
+
+    function setMsg(t) { const e = document.getElementById('msg'); if (e) e.textContent = t }
+    function num(v) { if (v === '' || v === null || v === undefined) return 0; const x = parseFloat(v); return isNaN(x) ? 0 : x }
+
+    async function fetchSheet(name) {
+      setMsg(`📥 "${name}" load ho rahi hai...`);
+      const url = `${API}?sheet=${encodeURIComponent(name)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Sheet "${name}" load failed (${res.status})`);
+      return await res.json(); // Returns 2D array directly — no CSV parsing needed!
+    }
+
+    function subj(s) {
+      const m = (s || '').toLowerCase();
+      if (/geo|bhugol|paryabaran|bhautik|samkalin/.test(m)) return 'Geography';
+      if (/his|itihas|vishay|sharma|modern|prachin|madhya|maurya|gupta|pashan|harappa|vedic|arya/.test(m)) return 'History';
+      if (/eco|arth|vivek|arthashastra|arthvyasastha|arthik/.test(m)) return 'Economy';
+      if (/polity|rajniti|samvidhan|loktantr|laxmi|bhag.*[ivx]+|parliament|sansad|nyay|chunav/.test(m)) return 'Polity';
+      if (/art|cul|sanskriti/.test(m)) return 'Art & Culture';
+      if (/env|paryavar/.test(m)) return 'Environment';
+      if (/sci|tech|vigyan/.test(m)) return 'Sci & Tech';
+      return 'Other';
+    }
+
+    // ── PARSERS (work on 2D arrays from Apps Script) ──────────────
+
+    // NCERT: col0=book name (merged), col1=chapter, col2=pages, col5=mcqs
+    // Header row: col1='NCERT'
+    function parseNCERT(rows) {
+      let books = [], cur = null, started = false;
+      for (const r of rows) {
+        const c0 = String(r[0] || '').trim();
+        const c1 = String(r[1] || '').trim();
+        const c2 = r[2]; const c5 = r[5];
+        if (c1 === 'NCERT' || c1 === ' NCERT') { started = true; continue; }
+        if (!started) continue;
+        if (String(c2).includes('Total =') || String(c1).includes('Total =')) continue;
+        if (/Total Unread|Remaining Days|Daily Target|Complete Today|Last Day/.test(c0)) continue;
+        if (c0 && c0 !== '0') {
+          cur = { name: c0.replace(/\s+/g, ' ').slice(0, 70), subject: subj(c0), chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(cur);
+        }
+        if (cur && c1 && !/^Total/.test(c1) && c1 !== 'NCERT') {
+          const p = num(c2), q = num(c5);
+          cur.chapters.push({ name: c1.slice(0, 80), reading: p, mcqs: q });
+          cur.total_reading += p; cur.total_mcqs += q;
+        }
+      }
+      return books.filter(b => b.chapters.length > 0);
+    }
+
+    // Books: col0=section name (non-empty = new group), col1=chapter, col2=pages, col5=mcqs
+    // Header row: col1='Books'
+    function parseBooks(rows) {
+      let hdr = rows.findIndex(r => String(r[1] || '').trim() === 'Books');
+      if (hdr < 0) hdr = 7;
+      let books = [], cur = null;
+      for (let i = hdr + 1; i < rows.length; i++) {
+        const r = rows[i];
+        const c0 = String(r[0] || '').trim();
+        const c1 = String(r[1] || '').trim();
+        const c2 = r[2]; const c5 = r[5];
+        if (String(c2).includes('Total =') || String(c1).includes('Total =')) continue;
+        if (/Total Unread|Remaining|Complete|Daily|Last/.test(c0)) continue;
+        // New section: col0 non-empty and not a digit
+        if (c0 && !/^\d+$/.test(c0) && c0 !== '0') {
+          const nm = c0.replace(/['"]/g, '').replace(/\s+/g, ' ').slice(0, 60);
+          cur = { name: nm, subject: subj(nm), chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(cur);
+        }
+        if (cur && c1 && !/^Total/.test(c1)) {
+          const p = num(c2), q = num(c5);
+          cur.chapters.push({ name: c1.slice(0, 80), reading: p, mcqs: q });
+          cur.total_reading += p; cur.total_mcqs += q;
+        }
+      }
+      return books.filter(b => b.chapters.length > 0);
+    }
+
+    // Notes: row0=header, col0=subject(when changes), col1=notebook#, col2=pages, col5=mcqs
+    function parseNotes(rows) {
+      const SM = {
+        History: 'History', Polity: 'Polity', Eco: 'Economy', Reasning: 'Reasoning/CSAT',
+        Reasoning: 'Reasoning/CSAT', 'Sci And Tech': 'Sci & Tech', GS: 'General Studies',
+        RC: 'Reasoning/CSAT', 'Map world': 'Geography', Maths: 'Reasoning/CSAT',
+        'पाषाण काल': 'History', 'हड्प्पा काल': 'History', Morya: 'History', 'गुप्त काल': 'History',
+        vedic: 'History', Env: 'Environment', Envirment: 'Environment',
+        'South America': 'Geography', Africa: 'Geography'
+      };
+      let notes = [], s = null;
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const c0 = String(r[0] || '').trim();
+        const c1 = String(r[1] || '').trim();
+        const c2 = r[2]; const c5 = r[5];
+        if (/Total Unread|Remaining|Daily|^Total/.test(c0)) continue;
+        if (c0) {
+          if (SM[c0]) s = SM[c0];
+          else if (isNaN(parseInt(c0)) && !/^Total/.test(c0)) s = subj(c0) || c0;
+        }
+        const nb = parseInt(c1);
+        if (!isNaN(nb) && nb > 0 && s) notes.push({ subject: s, notebook: nb, reading: num(c2), mcqs: num(c5) });
+      }
+      return notes;
+    }
+
+    // Progress: col8=ISO date string, col9=ncert, col10=notes, col11=books, col12=sum
+    // Apps Script returns real JS values so dates are ISO strings, numbers are numbers!
+    function parseProgress(rows) {
+      let data = [], seen = {};
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const ds = String(r[8] || '').trim();
+        if (!ds || ds === '') continue;
+        // ISO date like "2026-04-18T18:31:08.666Z"
+        const m = ds.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) continue;
+        const date = `${m[1]}-${m[2]}-${m[3]}`;
+        if (seen[date]) continue; seen[date] = true;
+        const nc = num(r[9]), nt = num(r[10]), bk = num(r[11]), tot = num(r[12]) || (nc + nt + bk);
+        if (tot === 0 && nc === 0 && nt === 0 && bk === 0) continue;
+        data.push({ date, ncert_read: nc, notes_read: nt, books_read: bk, total_read: tot });
+      }
+      return data.sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    // ── AGGREGATION ──────────────────────────────────────────────
+    function aggBooks(books) {
+      const m = {};
+      for (const b of books) {
+        if (!m[b.subject]) m[b.subject] = { subject: b.subject, total_reading: 0, total_mcqs: 0, chapters: 0 };
+        m[b.subject].total_reading += b.total_reading;
+        m[b.subject].total_mcqs += b.total_mcqs;
+        m[b.subject].chapters += b.chapters.length;
+      }
+      return Object.values(m).sort((a, b) => b.total_reading - a.total_reading);
+    }
+    function aggNotes(notes) {
+      const m = {};
+      for (const n of notes) {
+        if (!m[n.subject]) m[n.subject] = { subject: n.subject, total_reading: 0, total_mcqs: 0, notebooks: 0 };
+        m[n.subject].total_reading += n.reading;
+        m[n.subject].total_mcqs += n.mcqs;
+        m[n.subject].notebooks++;
+      }
+      return Object.values(m).sort((a, b) => b.total_reading - a.total_reading);
+    }
+
+    // ── RENDER ───────────────────────────────────────────────────
+    function bars(id, data, key) {
+      const el = document.getElementById(id); if (!el) return;
+      const mx = Math.max(...data.map(d => d[key]), 1);
+      el.innerHTML = data.map(d => {
+        const pct = Math.round(d[key] / mx * 100), c = COL[d.subject] || '#00d4ff';
+        return `<div class="sbar">
+      <div class="slabel" style="color:${c}">${d.subject}</div>
+      <div class="track"><div class="fill" style="width:${pct}%;background:${c}"></div></div>
+      <div style="width:46px;text-align:right;font-family:'JetBrains Mono';font-size:.78rem">${d[key]}</div>
+    </div>`;
+      }).join('');
+    }
+
+    function chart(id, data) {
+      const el = document.getElementById(id); if (!el) return;
+      if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:20px">No data</div>'; return; }
+      const mx = Math.max(...data.map(d => d.total_read), 1);
+      const W = Math.max(560, data.length * 40), H = 190;
+      el.innerHTML = `<div style="overflow-x:auto"><canvas id="_cv_${id}" width="${W}" height="${H}"></canvas></div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:#00d4ff"></div>NCERT</div>
+      <div class="li"><div class="ld" style="background:#ff6b35"></div>Notes</div>
+      <div class="li"><div class="ld" style="background:#10b981"></div>Books</div>
+    </div>`;
+      setTimeout(() => {
+        const cv = document.getElementById(`_cv_${id}`); if (!cv) return;
+        const ctx = cv.getContext('2d'), bw = (W - 36) / data.length;
+        for (let i = 0; i < data.length; i++) {
+          const x = 18 + i * bw, yb = H - 22;
+          const h1 = (data[i].ncert_read / mx) * (H - 48);
+          const h2 = (data[i].notes_read / mx) * (H - 48);
+          const h3 = (data[i].books_read / mx) * (H - 48);
+          if (h1 > 0) { ctx.fillStyle = '#00d4ff'; ctx.fillRect(x, yb - h1, bw - 2, h1) }
+          if (h2 > 0) { ctx.fillStyle = '#ff6b35'; ctx.fillRect(x, yb - h1 - h2, bw - 2, h2) }
+          if (h3 > 0) { ctx.fillStyle = '#10b981'; ctx.fillRect(x, yb - h1 - h2 - h3, bw - 2, h3) }
+          ctx.fillStyle = '#475569'; ctx.font = '8px monospace';
+          ctx.fillText(data[i].date.slice(5), x, yb + 14);
+          if (data[i].total_read > 0) { ctx.fillStyle = '#94a3b8'; ctx.font = '8px monospace'; ctx.fillText(data[i].total_read, x, yb - h1 - h2 - h3 - 3) }
+        }
+      }, 80);
+    }
+
+    function bdg(v, h, m) { return v > h ? '<span class="badge bh">Strong</span>' : v > m ? '<span class="badge bm">Partial</span>' : '<span class="badge bl">Pending</span>' }
+
+    // ── PAGE BUILDERS ─────────────────────────────────────────────
+    function pgOverview(ns, bs, ts, pr) {
+      const tot = pr.reduce((s, d) => s + d.total_read, 0);
+      const avg = Math.round(tot / Math.max(pr.length, 1));
+      const td = pr[pr.length - 1] || {};
+      return `<div class="grid">
+    <div class="card"><div class="ct">📚 Total Pages</div><div class="num" style="color:#00d4ff">${tot}</div></div>
+    <div class="card"><div class="ct">📅 Daily Avg</div><div class="num" style="color:#10b981">${avg}</div></div>
+    <div class="card"><div class="ct">🌅 Aaj</div><div class="num" style="color:#f59e0b">${td.total_read || 0}</div></div>
+    <div class="card"><div class="ct">📗 NCERT</div><div class="num" style="color:#7c3aed">${ns.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+    <div class="card"><div class="ct">📓 Notes</div><div class="num" style="color:#ff6b35">${ts.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+    <div class="card"><div class="ct">📘 Books</div><div class="num" style="color:#22c55e">${bs.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+  </div>
+  <div class="card"><div class="ct">📊 Subject-wise Total (NCERT + Notes + Books)</div><div id="ov-bars"></div></div>
+  <div class="card"><div class="ct">📈 Last 14 Days</div><div id="ov-chart" style="min-height:170px"></div></div>`;
+    }
+
+    function pgList(books, barId, label) {
+      const rows = books.map(b => `<tr>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${b.name}">${b.name}</td>
+    <td><span style="color:${COL[b.subject] || '#64748b'}">${b.subject}</span></td>
+    <td>${b.chapters.length}</td><td><b>${b.total_reading}</b></td><td>${b.total_mcqs}</td>
+    <td>${bdg(b.total_reading, 80, 15)}</td></tr>`).join('');
+      return `<div class="card"><div class="ct">📖 Subject-wise Reading</div><div id="${barId}"></div></div>
+    <div class="card"><div class="ct">${label} (${books.length} items)</div>
+      <div style="overflow-x:auto"><table><tr><th>Name</th><th>Subject</th><th>Ch</th><th>Pages</th><th>MCQs</th><th>Status</th></tr>${rows}</table></div></div>`;
+    }
+
+    function pgNotes(ts) {
+      const rows = ts.map(s => `<tr>
+    <td><span style="color:${COL[s.subject] || '#64748b'}">${s.subject}</span></td>
+    <td>${s.notebooks}</td><td><b>${s.total_reading}</b></td><td>${s.total_mcqs}</td>
+    <td>${s.total_reading > 100 ? '<span class="badge bh">Good</span>' : s.total_reading > 40 ? '<span class="badge bm">Medium</span>' : '<span class="badge bl">Low</span>'}</td></tr>`).join('');
+      return `<div class="card"><div class="ct">📖 Subject-wise Reading</div><div id="nt-bars"></div></div>
+    <div class="card"><div class="ct">📓 Notebooks Detail</div><div style="overflow-x:auto">
+      <table><tr><th>Subject</th><th>Notebooks</th><th>Pages</th><th>MCQs</th><th>Priority</th></tr>${rows}</table></div></div>`;
+    }
+
+    function pgProgress(pr) {
+      const mx = Math.max(...pr.map(p => p.total_read), 1);
+      const heat = pr.slice(-90).map(d => {
+        const p = d.total_read / mx, cl = d.total_read === 0 ? '' : p < .25 ? 'h1' : p < .5 ? 'h2' : p < .75 ? 'h3' : 'h4';
+        return `<div class="hc ${cl}" title="${d.date}: ${d.total_read}p (N:${d.ncert_read} Nt:${d.notes_read} B:${d.books_read})"></div>`;
+      }).join('');
+      const tbl = [...pr.slice(-7)].reverse().map(d => `<tr>
+    <td>${d.date}</td>
+    <td style="color:#00d4ff">${d.ncert_read}</td>
+    <td style="color:#ff6b35">${d.notes_read}</td>
+    <td style="color:#10b981">${d.books_read}</td>
+    <td><b>${d.total_read}</b></td></tr>`).join('');
+      return `<div class="card"><div class="ct">📈 Last 14 Days Chart</div><div id="pr-chart" style="min-height:170px"></div></div>
+    <div class="card"><div class="ct">🔥 Activity Heatmap (Last 90 Days)</div>
+      <div class="hmap">${heat}</div>
+      <div class="leg" style="margin-top:10px">
+        <div class="li"><div class="hc"></div>0p</div>
+        <div class="li"><div class="hc h1"></div>Low</div>
+        <div class="li"><div class="hc h2"></div>Med</div>
+        <div class="li"><div class="hc h3"></div>Good</div>
+        <div class="li"><div class="hc h4"></div>Best</div>
+      </div></div>
+    <div class="card"><div class="ct">📋 Last 7 Days Detail</div>
+      <table><tr><th>Date</th><th>NCERT</th><th>Notes</th><th>Books</th><th>Total</th></tr>${tbl}</table></div>`;
+    }
+
+    function pgCompare(ns, bs, ts) {
+      const com = {};
+      ns.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].nc = s.total_reading });
+      bs.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].bk = s.total_reading });
+      ts.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].nt = s.total_reading });
+      const arr = Object.entries(com).map(([s, v]) => ({ s, nc: v.nc, bk: v.bk, nt: v.nt, tot: v.nc + v.bk + v.nt })).sort((a, b) => b.tot - a.tot);
+      const mx = Math.max(...arr.map(x => x.tot), 1);
+      const rows = arr.map(x => `<tr>
+    <td><span style="color:${COL[x.s] || '#64748b'}">${x.s}</span></td>
+    <td style="color:#00d4ff">${x.nc}</td>
+    <td style="color:#ff6b35">${x.nt}</td>
+    <td style="color:#10b981">${x.bk}</td>
+    <td><b>${x.tot}</b></td>
+    <td><div class="track"><div class="fill" style="width:${Math.round(x.tot / mx * 100)}%;background:${COL[x.s] || '#7c3aed'}"></div></div></td>
+  </tr>`).join('');
+      return `<div class="card"><div class="ct">⚖️ Subject Comparison</div><div style="overflow-x:auto">
+    <table><tr><th>Subject</th><th>NCERT</th><th>Notes</th><th>Books</th><th>Total</th><th>Bar</th></tr>${rows}</table></div></div>`;
+    }
+
+    // ── MAIN ─────────────────────────────────────────────────────
+    async function init() {
+      try {
+        const [nr, br, tr, pr] = await Promise.all([
+          fetchSheet('NCERT'), fetchSheet('Books'), fetchSheet('Notes'), fetchSheet('Progress')
+        ]);
+        setMsg('⚙️ Processing...');
+
+        const ncBooks = parseNCERT(nr);
+        const bkBooks = parseBooks(br);
+        const ntData = parseNotes(tr);
+        const prog = parseProgress(pr);
+
+        const ns = aggBooks(ncBooks), bs = aggBooks(bkBooks), ts = aggNotes(ntData);
+
+        console.log('✅ NCERT books:', ncBooks.length, '| pages:', ns.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Books groups:', bkBooks.length, '| pages:', bs.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Notes entries:', ntData.length, '| pages:', ts.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Progress days:', prog.length, '| total:', prog.reduce((s, d) => s + d.total_read, 0));
+
+        const app = document.getElementById('app');
+        app.innerHTML = `
+      <div style="margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:1.45rem;font-weight:700;color:#00d4ff">📊 UPSC प्रगति डैशबोर्ड</div>
+          <div style="font-size:.72rem;color:#475569">Updated: ${new Date().toLocaleString('en-IN')}</div>
+        </div>
+        <button onclick="location.reload()" style="margin-left:auto">🔄 Refresh</button>
+      </div>
+      <div class="tabs">
+        <div class="tab on" data-t="ov">📊 Overview</div>
+        <div class="tab" data-t="nc">📗 NCERT</div>
+        <div class="tab" data-t="bk">📘 Books</div>
+        <div class="tab" data-t="nt">📓 Notes</div>
+        <div class="tab" data-t="pr">📈 Progress</div>
+        <div class="tab" data-t="cm">⚖️ Compare</div>
+      </div>
+      <div id="p-ov" class="panel on">${pgOverview(ns, bs, ts, prog)}</div>
+      <div id="p-nc" class="panel">${pgList(ncBooks, 'nc-bars', '📗 NCERT Books')}</div>
+      <div id="p-bk" class="panel">${pgList(bkBooks, 'bk-bars', '📘 Books')}</div>
+      <div id="p-nt" class="panel">${pgNotes(ts)}</div>
+      <div id="p-pr" class="panel">${pgProgress(prog)}</div>
+      <div id="p-cm" class="panel">${pgCompare(ns, bs, ts)}</div>`;
+
+        document.getElementById('loader').style.display = 'none';
+        app.style.display = 'block';
+
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+            tab.classList.add('on');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+            document.getElementById(`p-${tab.dataset.t}`).classList.add('on');
+            if (tab.dataset.t === 'pr') chart('pr-chart', prog.slice(-14));
+          });
+        });
+
+        // Render all bars and charts
+        const com = {};
+        [...ns, ...bs, ...ts].forEach(s => {
+          if (!com[s.subject]) com[s.subject] = { subject: s.subject, total_reading: 0 };
+          com[s.subject].total_reading += s.total_reading;
+        });
+        bars('ov-bars', Object.values(com).sort((a, b) => b.total_reading - a.total_reading), 'total_reading');
+        chart('ov-chart', prog.slice(-14));
+        bars('nc-bars', ns, 'total_reading');
+        bars('bk-bars', bs, 'total_reading');
+        bars('nt-bars', ts, 'total_reading');
+
+      } catch (e) {
+        console.error(e);
+        document.getElementById('loader').innerHTML = `<div class="err">
+      <h3>❌ Error</h3>
+      <p style="margin:12px 0;word-break:break-all">${e.message}</p>
+      <p style="color:#94a3b8;font-size:.83rem;margin-bottom:14px">Apps Script → Deploy → Manage → "Anyone" check karo</p>
+      <button onclick="location.reload()">🔄 Retry</button></div>`;
+      }
+    }
+    init();
+  </script>
+</body>
+
+</html>
