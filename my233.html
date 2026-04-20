@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>📊 UPSC प्रगति डैशबोर्ड</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0d14;
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 60px;
+      background: #111827;
+      border-radius: 24px;
+    }
+
+    .loader-ring {
+      width: 50px;
+      height: 50px;
+      border: 3px solid #1e2d45;
+      border-top-color: #00d4ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    button {
+      background: #2c5282;
+      border: none;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      border-radius: 16px;
+      padding: 20px;
+      flex: 1 1 200px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .big-num {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono';
+    }
+
+    .subject-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .subject-label {
+      width: 150px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-high {
+      background: #10b98120;
+      color: #10b981;
+    }
+
+    .badge-med {
+      background: #f59e0b20;
+      color: #f59e0b;
+    }
+
+    .badge-low {
+      background: #ef444420;
+      color: #ef4444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th,
+    td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #1e2d45;
+    }
+
+    th {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .heatmap-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .heatmap-cell {
+      width: 22px;
+      height: 22px;
+      background: #1e293b;
+      border-radius: 4px;
+    }
+
+    .h1 {
+      background: #00d4ff30;
+    }
+
+    .h2 {
+      background: #00d4ff60;
+    }
+
+    .h3 {
+      background: #00d4ff90;
+    }
+
+    .h4 {
+      background: #00d4ff;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: #111827;
+      border: 1px solid #1e2d45;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      color: #94a3b8;
+    }
+
+    .tab.active {
+      background: #00d4ff20;
+      border-color: #00d4ff;
+      color: #00d4ff;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    @media(max-width:700px) {
+      .subject-label {
+        width: 100px;
+        font-size: 0.75rem;
+      }
+
+      .big-num {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="main" style="display:none;"></div>
+  <div id="loader" class="loader">
+    <div class="loader-ring"></div>
+    <div id="loader-msg">🔄 Data fetch ho raha hai...</div>
+  </div>
+
+  <script>
+    const SHEET_ID = '1GuXyX-WsIZlQ0Myoj4HIYL_YfXueOjigFi4ZqSPLq5U';
+    const COLORS = {
+      'Geography': '#00d4ff', 'History': '#ff6b35', 'Economy': '#10b981',
+      'Polity': '#7c3aed', 'Art & Culture': '#f59e0b', 'Environment': '#22c55e',
+      'Sci & Tech': '#ec4899', 'Reasoning/CSAT': '#8b5cf6', 'General Studies': '#06b6d4', 'Other': '#64748b'
+    };
+
+    // ============================================================
+    // ROBUST CSV PARSER — handles quoted multiline + commas inside quotes
+    // ============================================================
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], cell = '', inQ = false, i = 0;
+      const t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      while (i < t.length) {
+        const ch = t[i];
+        if (ch === '"') {
+          if (inQ && t[i + 1] === '"') { cell += '"'; i += 2; continue; }
+          inQ = !inQ; i++; continue;
+        }
+        if (ch === ',' && !inQ) { row.push(cell.trim()); cell = ''; i++; continue; }
+        if (ch === '\n' && !inQ) {
+          row.push(cell.trim()); cell = '';
+          if (row.some(c => c !== '')) rows.push(row);
+          row = []; i++; continue;
+        }
+        // newline inside quotes = part of cell content, replace with space
+        if (ch === '\n' && inQ) { cell += ' '; i++; continue; }
+        cell += ch; i++;
+      }
+      if (cell !== '' || row.length) { row.push(cell.trim()); if (row.some(c => c !== '')) rows.push(row); }
+      return rows;
+    }
+
+    function setMsg(t) { const el = document.getElementById('loader-msg'); if (el) el.textContent = t; }
+    function n(v) { const x = parseFloat(String(v || '').replace(/[^\d.-]/g, '')); return isNaN(x) ? 0 : x; }
+
+    async function fetchSheet(name) {
+      setMsg(`📥 "${name}" load ho rahi hai...`);
+      const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(name)}`;
+      const proxy = `https://corsproxy.io/?url=${encodeURIComponent(base)}`;
+      let res;
+      try { res = await fetch(base); if (!res.ok) throw 0; }
+      catch { res = await fetch(proxy); }
+      if (!res.ok) throw new Error(`Sheet load failed: "${name}" (HTTP ${res.status})`);
+      const text = await res.text();
+      return parseCSV(text);
+    }
+
+    function detectSubject(s) {
+      const m = (s || '').toLowerCase();
+      if (m.includes('geo') || m.includes('bhugol') || m.includes('paryabaran') || m.includes('bhautik') || m.includes('samkalin bharat')) return 'Geography';
+      if (m.includes('his') || m.includes('itihas') || m.includes('vishay') || m.includes('sharma') || m.includes('modern') || m.includes('mh')) return 'History';
+      if (m.includes('eco') || m.includes('arth') || m.includes('vivek') || m.includes('arthashastra') || m.includes('arthvyasastha') || m.includes('arthik')) return 'Economy';
+      if (m.includes('polity') || m.includes('rajniti') || m.includes('samvidhan') || m.includes('loktantr') || m.includes('laxmi') || m.includes('raajniti')) return 'Polity';
+      if (m.includes('art') || m.includes('cul')) return 'Art & Culture';
+      if (m.includes('env')) return 'Environment';
+      if (m.includes('sci') || m.includes('tech')) return 'Sci & Tech';
+      return 'Other';
+    }
+
+    // ============================================================
+    // PARSERS
+    // ============================================================
+
+    // NCERT sheet:
+    // Rows 0-28: Book names in col0 (short codes like 'Geo','His') + book chapters listed in col1
+    // Row 33: Header row — col1=' NCERT', col2='Reading'
+    // Row 34+: col0=full book name (now single-line since we replace \n), col1=chapter, col2=pages, col5=mcqs
+    function parseNCERT(rows) {
+      let books = [], cur = null, started = false;
+      for (const row of rows) {
+        const c0 = (row[0] || '').trim();
+        const c1 = (row[1] || '').trim();
+        const c2 = (row[2] || '').trim();
+        const c5 = (row[5] || '').trim();
+
+        // Header detection
+        if (c1 === 'NCERT' || c1 === ' NCERT') { started = true; continue; }
+        if (!started) continue;
+
+        // Skip summary rows
+        if (c2.startsWith('Total =') || c1.startsWith('Total =') || c0.includes('Total Unread') || c0.includes('Remaining') || c0.includes('Daily') || c0.includes('Complete')) continue;
+
+        // New book: col0 has content
+        if (c0) {
+          cur = { name: c0.replace(/\s+/g, ' ').substring(0, 70), subject: detectSubject(c0), chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(cur);
+        }
+
+        // Chapter row: col1 has content, col2 is a number or col1 is chapter text
+        if (cur && c1 && !c1.startsWith('Total') && c1 !== 'NCERT') {
+          const pages = n(c2), mcqs = n(c5);
+          cur.chapters.push({ name: c1.substring(0, 80), reading: pages, mcqs });
+          cur.total_reading += pages; cur.total_mcqs += mcqs;
+        }
+      }
+      return books.filter(b => b.chapters.length > 0);
+    }
+
+    // Books sheet:
+    // Rows 0-6: Book names in col0 (list of books)
+    // Row 7: Header — col1='Books'
+    // Row 8+: col0=section name(sometimes), col1=chapter, col2=pages, col5=mcqs
+    function parseBooks(rows) {
+      // Collect book names from col0 before header
+      const bookNames = [];
+      let hdrIdx = 7;
+      for (let i = 0; i < rows.length; i++) {
+        if ((rows[i][1] || '').trim() === 'Books') { hdrIdx = i; break; }
+        const v = (rows[i][0] || '').trim();
+        if (v && !v.includes('Total') && !v.includes('Remaining') && !v.includes('Complete') && !v.includes('Daily')) bookNames.push(v);
+      }
+
+      let books = [], cur = null, bookIdx = 0;
+      for (let i = hdrIdx + 1; i < rows.length; i++) {
+        const row = rows[i];
+        const c0 = (row[0] || '').trim(), c1 = (row[1] || '').trim(), c2 = (row[2] || '').trim(), c5 = (row[5] || '').trim();
+        if (c2.startsWith('Total =') || c1.startsWith('Total =') || c0.includes('Total Unread') || c0.includes('Remaining') || c0.includes('Complete')) continue;
+
+        if (c0) {
+          // new section — use corresponding book name from the list at top
+          const bname = bookNames[bookIdx] || c0;
+          bookIdx++;
+          cur = { name: bname.replace(/\s+/g, ' ').trim().substring(0, 70), subject: detectSubject(bname), chapters: [], total_reading: 0, total_mcqs: 0 };
+          books.push(cur);
+        }
+        if (cur && c1 && !c1.startsWith('Total')) {
+          const pages = n(c2), mcqs = n(c5);
+          cur.chapters.push({ name: c1.substring(0, 80), reading: pages, mcqs });
+          cur.total_reading += pages; cur.total_mcqs += mcqs;
+        }
+      }
+      return books.filter(b => b.chapters.length > 0);
+    }
+
+    // Notes sheet:
+    // Row 0: Header
+    // col0=subject(when changes), col1=notebook#, col2=pages, col5=mcqs
+    function parseNotes(rows) {
+      const SM = {
+        'History': 'History', 'Polity': 'Polity', 'Eco': 'Economy', 'Reasning': 'Reasoning/CSAT',
+        'Reasoning': 'Reasoning/CSAT', 'Sci And Tech': 'Sci & Tech', 'GS': 'General Studies',
+        'RC': 'Reasoning/CSAT', 'Map world': 'Geography', 'Maths': 'Reasoning/CSAT',
+        'पाषाण काल': 'History', 'हड्प्पा काल': 'History', 'Morya': 'History', 'गुप्त काल': 'History',
+        'vedic': 'History', 'Env': 'Environment', 'Envirment': 'Environment',
+        'South America': 'Geography', 'Africa': 'Geography'
+      };
+      let notes = [], sub = null;
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const c0 = (row[0] || '').trim(), c1 = (row[1] || '').trim(), c2 = (row[2] || ''), c5 = (row[5] || '');
+        if (c0.includes('Total Unread') || c0.includes('Remaining') || c0.includes('Daily') || c0.startsWith('Total')) continue;
+        if (c0 && SM[c0]) sub = SM[c0];
+        else if (c0 && isNaN(parseInt(c0)) && !c0.startsWith('Total')) sub = detectSubject(c0) || c0;
+        const nb = parseInt(c1);
+        if (!isNaN(nb) && nb > 0 && sub) notes.push({ subject: sub, notebook: nb, reading: n(c2), mcqs: n(c5) });
+      }
+      return notes;
+    }
+
+    // Progress sheet:
+    // Row 0: Header (col8=NaN, col9='NCERT', col10='Notes', col11='Books', col12='Sum')
+    // Row 1+: col8=timestamp(date), col9=ncert, col10=notes, col11=books, col12=sum
+    function parseProgress(rows) {
+      let data = [], seen = {};
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const ds = (row[8] || '').trim();
+        if (!ds) continue;
+        const m = ds.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) continue;
+        const date = `${m[1]}-${m[2]}-${m[3]}`;
+        if (seen[date]) continue;
+        const ncert = n(row[9]), notes = n(row[10]), books = n(row[11]), total = n(row[12]) || (ncert + notes + books);
+        seen[date] = true;
+        data.push({ date, ncert_read: ncert, notes_read: notes, books_read: books, total_read: total });
+      }
+      return data.sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function aggBySubj(books) {
+      const map = {};
+      for (const b of books) {
+        if (!map[b.subject]) map[b.subject] = { subject: b.subject, total_reading: 0, total_mcqs: 0, chapters: 0 };
+        map[b.subject].total_reading += b.total_reading; map[b.subject].total_mcqs += b.total_mcqs; map[b.subject].chapters += b.chapters.length;
+      }
+      return Object.values(map).sort((a, b) => b.total_reading - a.total_reading);
+    }
+    function aggNotesBySubj(notes) {
+      const map = {};
+      for (const nd of notes) {
+        if (!map[nd.subject]) map[nd.subject] = { subject: nd.subject, total_reading: 0, total_mcqs: 0, notebooks: 0 };
+        map[nd.subject].total_reading += nd.reading; map[nd.subject].total_mcqs += nd.mcqs; map[nd.subject].notebooks++;
+      }
+      return Object.values(map).sort((a, b) => b.total_reading - a.total_reading);
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderBars(id, data, key) {
+      const el = document.getElementById(id); if (!el) return;
+      const max = Math.max(...data.map(d => d[key]), 1);
+      el.innerHTML = data.map(d => {
+        const pct = Math.round(d[key] / max * 100), col = COLORS[d.subject] || '#00d4ff';
+        return `<div class="subject-bar">
+      <div class="subject-label" style="color:${col}">${d.subject}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div style="width:50px;text-align:right;font-family:'JetBrains Mono';font-size:0.8rem">${d[key]}</div>
+    </div>`;
+      }).join('');
+    }
+
+    function renderChart(id, data) {
+      const el = document.getElementById(id); if (!el) return;
+      if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:20px">No data</div>'; return; }
+      const max = Math.max(...data.map(d => d.total_read), 1);
+      const W = Math.max(600, data.length * 42), H = 200;
+      el.innerHTML = `<div style="overflow-x:auto"><canvas id="_c_${id}" width="${W}" height="${H}" style="height:${H}px"></canvas></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div>NCERT</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>Notes</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Books</div>
+    </div>`;
+      setTimeout(() => {
+        const cv = document.getElementById(`_c_${id}`); if (!cv) return;
+        const ctx = cv.getContext('2d'), bw = (W - 40) / data.length;
+        for (let i = 0; i < data.length; i++) {
+          const x = 20 + i * bw, yb = H - 25;
+          const h1 = (data[i].ncert_read / max) * (H - 50);
+          const h2 = (data[i].notes_read / max) * (H - 50);
+          const h3 = (data[i].books_read / max) * (H - 50);
+          if (h1 > 0) { ctx.fillStyle = '#00d4ff'; ctx.fillRect(x, yb - h1, bw - 3, h1); }
+          if (h2 > 0) { ctx.fillStyle = '#ff6b35'; ctx.fillRect(x, yb - h1 - h2, bw - 3, h2); }
+          if (h3 > 0) { ctx.fillStyle = '#10b981'; ctx.fillRect(x, yb - h1 - h2 - h3, bw - 3, h3); }
+          ctx.fillStyle = '#475569'; ctx.font = '9px monospace';
+          ctx.fillText(data[i].date.slice(5), x + 1, yb + 14);
+          if (data[i].total_read > 0) { ctx.fillStyle = '#94a3b8'; ctx.font = '8px monospace'; ctx.fillText(data[i].total_read, x + 2, yb - h1 - h2 - h3 - 4); }
+        }
+      }, 100);
+    }
+
+    function badge(v, h, m) { return v > h ? '<span class="badge badge-high">Strong</span>' : v > m ? '<span class="badge badge-med">Partial</span>' : '<span class="badge badge-low">Pending</span>'; }
+
+    function rOverview(ns, bs, ts, pr) {
+      const tot = pr.reduce((s, d) => s + d.total_read, 0);
+      const avg = Math.round(tot / Math.max(pr.length, 1));
+      const td = pr[pr.length - 1] || {};
+      return `<div class="grid">
+    <div class="card"><div class="card-title">📚 Total Pages</div><div class="big-num" style="color:#00d4ff">${tot}</div></div>
+    <div class="card"><div class="card-title">📅 Daily Avg</div><div class="big-num" style="color:#10b981">${avg}</div></div>
+    <div class="card"><div class="card-title">🌅 Aaj</div><div class="big-num" style="color:#f59e0b">${td.total_read || 0}</div></div>
+    <div class="card"><div class="card-title">📗 NCERT Pages</div><div class="big-num" style="color:#7c3aed">${ns.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+    <div class="card"><div class="card-title">📓 Notes Pages</div><div class="big-num" style="color:#ff6b35">${ts.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+    <div class="card"><div class="card-title">📘 Books Pages</div><div class="big-num" style="color:#22c55e">${bs.reduce((s, d) => s + d.total_reading, 0)}</div></div>
+  </div>
+  <div class="card"><div class="card-title">📊 Subject-wise Total</div><div id="ov-bars"></div></div>
+  <div class="card"><div class="card-title">📈 Last 14 Days</div><div id="ov-chart" style="min-height:180px"></div></div>`;
+    }
+
+    function rBookList(books, barId) {
+      const rows = books.map(b => `<tr>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${b.name}">${b.name}</td>
+    <td><span style="color:${COLORS[b.subject] || '#64748b'}">${b.subject}</span></td>
+    <td>${b.chapters.length}</td><td><b>${b.total_reading}</b></td><td>${b.total_mcqs}</td>
+    <td>${badge(b.total_reading, 80, 20)}</td></tr>`).join('');
+      return `<div class="card"><div class="card-title">📖 Subject-wise</div><div id="${barId}"></div></div>
+    <div class="card"><div class="card-title">📚 Detail (${books.length} items)</div>
+      <div style="overflow-x:auto"><table><tr><th>Name</th><th>Subject</th><th>Ch</th><th>Pages</th><th>MCQs</th><th>Status</th></tr>${rows}</table></div></div>`;
+    }
+
+    function rNotes(ts) {
+      const rows = ts.map(s => `<tr>
+    <td><span style="color:${COLORS[s.subject] || '#64748b'}">${s.subject}</span></td>
+    <td>${s.notebooks}</td><td><b>${s.total_reading}</b></td><td>${s.total_mcqs}</td>
+    <td>${s.total_reading > 100 ? '<span class="badge badge-high">Good</span>' : s.total_reading > 40 ? '<span class="badge badge-med">Medium</span>' : '<span class="badge badge-low">Low</span>'}</td>
+  </tr>`).join('');
+      return `<div class="card"><div class="card-title">📖 Subject-wise</div><div id="notes-bars"></div></div>
+    <div class="card"><div class="card-title">📓 Detail</div><div style="overflow-x:auto">
+      <table><tr><th>Subject</th><th>Notebooks</th><th>Pages</th><th>MCQs</th><th>Priority</th></tr>${rows}</table></div></div>`;
+    }
+
+    function rProgress(pr) {
+      const mx = Math.max(...pr.map(p => p.total_read), 1);
+      const heat = pr.slice(-90).map(d => {
+        const p = d.total_read / mx, cls = d.total_read === 0 ? '' : p < 0.25 ? 'h1' : p < 0.5 ? 'h2' : p < 0.75 ? 'h3' : 'h4';
+        return `<div class="heatmap-cell ${cls}" title="${d.date}: ${d.total_read}p"></div>`;
+      }).join('');
+      const tbl = [...pr.slice(-7)].reverse().map(d => `<tr>
+    <td>${d.date}</td><td style="color:#00d4ff">${d.ncert_read}</td>
+    <td style="color:#ff6b35">${d.notes_read}</td><td style="color:#10b981">${d.books_read}</td>
+    <td><b>${d.total_read}</b></td></tr>`).join('');
+      return `<div class="card"><div class="card-title">📈 Last 14 Days</div><div id="pr-chart" style="min-height:180px"></div></div>
+    <div class="card"><div class="card-title">🔥 Heatmap (Last 90 Days)</div>
+      <div class="heatmap-grid">${heat}</div>
+      <div class="legend" style="margin-top:12px">
+        <div class="legend-item"><div class="heatmap-cell"></div>0 pages</div>
+        <div class="legend-item"><div class="heatmap-cell h1"></div>Low</div>
+        <div class="legend-item"><div class="heatmap-cell h2"></div>Medium</div>
+        <div class="legend-item"><div class="heatmap-cell h3"></div>Good</div>
+        <div class="legend-item"><div class="heatmap-cell h4"></div>Excellent</div>
+      </div></div>
+    <div class="card"><div class="card-title">📋 Last 7 Days Detail</div><table>
+      <tr><th>Date</th><th>NCERT</th><th>Notes</th><th>Books</th><th>Total</th></tr>${tbl}</table></div>`;
+    }
+
+    function rCompare(ns, bs, ts) {
+      const com = {};
+      ns.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].nc = s.total_reading; });
+      bs.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].bk = s.total_reading; });
+      ts.forEach(s => { if (!com[s.subject]) com[s.subject] = { nc: 0, bk: 0, nt: 0 }; com[s.subject].nt = s.total_reading; });
+      const subs = Object.entries(com).map(([sub, v]) => ({ sub, ncert: v.nc, books: v.bk, notes: v.nt, total: v.nc + v.bk + v.nt })).sort((a, b) => b.total - a.total);
+      const mx = Math.max(...subs.map(s => s.total), 1);
+      const rows = subs.map(s => `<tr>
+    <td><span style="color:${COLORS[s.sub] || '#64748b'}">${s.sub}</span></td>
+    <td style="color:#00d4ff">${s.ncert}</td><td style="color:#ff6b35">${s.notes}</td>
+    <td style="color:#10b981">${s.books}</td><td><b>${s.total}</b></td>
+    <td><div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.total / mx * 100)}%;background:${COLORS[s.sub] || '#7c3aed'}"></div></div></td>
+  </tr>`).join('');
+      return `<div class="card"><div class="card-title">⚖️ Subject Comparison</div><div style="overflow-x:auto">
+    <table><tr><th>Subject</th><th>NCERT</th><th>Notes</th><th>Books</th><th>Total</th><th>Bar</th></tr>${rows}</table></div></div>`;
+    }
+
+    // ============================================================
+    // MAIN
+    // ============================================================
+    async function init() {
+      try {
+        const [nr, br, tr, pr] = await Promise.all([
+          fetchSheet('NCERT'), fetchSheet('Books'), fetchSheet('Notes'), fetchSheet('Progress')
+        ]);
+        setMsg('⚙️ Data process ho raha hai...');
+
+        const ncertBooks = parseNCERT(nr);
+        const booksBooks = parseBooks(br);
+        const notesData = parseNotes(tr);
+        const progress = parseProgress(pr);
+
+        const ns = aggBySubj(ncertBooks), bs = aggBySubj(booksBooks), ts = aggNotesBySubj(notesData);
+
+        // Debug info in console
+        console.log('✅ NCERT books:', ncertBooks.length, '| Total pages:', ns.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Books:', booksBooks.length, '| Total pages:', bs.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Notes entries:', notesData.length, '| Total pages:', ts.reduce((s, d) => s + d.total_reading, 0));
+        console.log('✅ Progress days:', progress.length, '| Total pages:', progress.reduce((s, d) => s + d.total_read, 0));
+
+        const main = document.getElementById('main');
+        main.innerHTML = `
+      <div style="margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:1.5rem;font-weight:700;color:#00d4ff">📊 UPSC प्रगति डैशबोर्ड</div>
+          <div style="font-size:0.75rem;color:#475569">Updated: ${new Date().toLocaleString('en-IN')}</div>
+        </div>
+        <button onclick="location.reload()" style="margin-left:auto">🔄 Refresh</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="ov">📊 Overview</div>
+        <div class="tab" data-tab="nc">📗 NCERT</div>
+        <div class="tab" data-tab="bk">📘 Books</div>
+        <div class="tab" data-tab="nt">📓 Notes</div>
+        <div class="tab" data-tab="pr">📈 Progress</div>
+        <div class="tab" data-tab="cm">⚖️ Compare</div>
+      </div>
+      <div id="panel-ov" class="panel active">${rOverview(ns, bs, ts, progress)}</div>
+      <div id="panel-nc" class="panel">${rBookList(ncertBooks, 'nc-bars')}</div>
+      <div id="panel-bk" class="panel">${rBookList(booksBooks, 'bk-bars')}</div>
+      <div id="panel-nt" class="panel">${rNotes(ts)}</div>
+      <div id="panel-pr" class="panel">${rProgress(progress)}</div>
+      <div id="panel-cm" class="panel">${rCompare(ns, bs, ts)}</div>`;
+
+        document.getElementById('loader').style.display = 'none';
+        main.style.display = 'block';
+
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+            if (tab.dataset.tab === 'pr') renderChart('pr-chart', progress.slice(-14));
+          });
+        });
+
+        // Render all charts/bars
+        const com = {};
+        [...ns, ...bs, ...ts].forEach(s => { if (!com[s.subject]) com[s.subject] = { subject: s.subject, total_reading: 0 }; com[s.subject].total_reading += s.total_reading; });
+        renderBars('ov-bars', Object.values(com).sort((a, b) => b.total_reading - a.total_reading), 'total_reading');
+        renderChart('ov-chart', progress.slice(-14));
+        renderBars('nc-bars', ns, 'total_reading');
+        renderBars('bk-bars', bs, 'total_reading');
+        renderBars('notes-bars', ts, 'total_reading');
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loader').innerHTML = `<div class="error-box">
+      <h3>❌ Error</h3><p style="margin:12px 0;word-break:break-all">${err.message}</p>
+      <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:16px">Sheet share → "Anyone with the link" → Viewer</p>
+      <button onclick="location.reload()">🔄 Retry</button></div>`;
+      }
+    }
+    init();
+  </script>
+</body>
+
+</html>
